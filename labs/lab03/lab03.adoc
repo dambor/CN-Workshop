@@ -536,81 +536,11 @@ Add the following to your Spring Boot configuration:
 [source,yaml,subs="verbatim,attributes"]
 ----
 management:
-  security:
-    enabled: false
   info:
     git:
       mode: full
-  cloudfoundry:
-    enabled: true
-    skip-ssl-validation: false # set to true if using an insecure CF environment
 ----
 
-. In order to add full build information to your artifact that is pushed to Cloud Foundry, and add the following execution and classifier to the `spring-boot-maven-plugin`:
-+
-.cloud-native-spring/pom.xml
-[source,xml]
-----
-<executions>
-  <execution>
-    <goals>
-      <goal>build-info</goal>
-    </goals>
-  </execution>
-</executions>
-<configuration>
-  <classifier>exec</classifier>
-</configuration>
-----
-+
-The full plugin config should look like the following:
-+
-.cloud-native-spring/pom.xml
-[source,xml]
-----
-<project>
-  [...]
-  <build>
-    <plugins>
-      [...]
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>build-info</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <classifier>exec</classifier>
-        </configuration>
-      </plugin>
-      [...]
-    </plugins>
-  </build>
-  [...]
-</project
-----
-
-. By specifying a classifier we actually just produced 2 jars, one that is executable and one that can be used as an artifact that could be included in other apps (such as our Client UI app we'll create later).  Because of this we need to change the name of the jar we included in our manifest.yml file.
-+
-Change the Cloud Foundry manifest path property to:
-+
-.cloud-native-spring/manifest.yml
-[source,yaml]
-----
----
-applications:
-- name: cloud-native-spring
-  random-route: true
-  memory: 768M
-  path: target/cloud-native-spring-0.0.1-SNAPSHOT-exec.jar # <-- update jar name
-  timeout: 180
-  env:
-    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom
-----
 . Rebuild the application
 +
 [source,bash]
