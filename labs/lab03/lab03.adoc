@@ -18,7 +18,7 @@ Spring Boot includes a number of additional features to help you monitor and man
 
 Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production. These features are added by adding `spring-boot-starter-actuator` to the classpath.  During our initial project setup with https://start.spring.io[Spring Initializr] we've already included that.
 
-. Verify the Spring Boot Actuator dependency is listed in Maven `dependencies`:
+. Verify the Spring Boot Actuator dependency is listed in Maven `dependencies`.  Additionally, add the spring security starter dependency:
 +
 .cloud-native-spring/pom.xml
 [source,xml]
@@ -27,19 +27,36 @@ Spring Boot includes a number of additional features to help you monitor and man
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
 ----
 
-. By default Spring Boot will use Spring Security to protect these management endpoints (which is a good thing!) We’ll set a simple password to make demonstration a bit easier and simpler.  Additionally, we need to publish these endpoints via REST.
+. By default Spring Boot will use Spring Security to protect these management endpoints (which is a good thing!) Though you wouldn’t want to disable this in production, we’ll do so in this sample app to make demonstration a bit easier and simpler.
 +
-Add the following to your Spring Boot configuration:
+Add the following inner cass to you to your Spring Boot application:
++
+.cloud-native-spring/src/main/java/io/pivotal/cloudnativespring/CloudNativeSpringApplication.java
+[source,java,numbered]
+----
+@Configuration
+protected static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.authorizeRequests().anyRequest().permitAll();
+  }
+
+}
+----
+
+. Additionally, we need to publish these endpoints via REST.  Add the following to your Spring Boot configuration:
+
 +
 .cloud-native-spring/src/main/resources/application.yml
 [source,yaml]
 ----
-spring:
-  security:
-    user:
-      password: p1v0tal
 management:
   endpoints:
     web:
@@ -57,7 +74,7 @@ management:
 CN-Workshop/labs/my_work/cloud-native-spring $ ./mvnw spring-boot:run
 ----
 +
-Try out the following endpoints. Remember that you set the password to _p1v0tal_ and the default username is _user_. The output is omitted here because it can be quite large:
+Try out the following endpoints. The output is omitted here because it can be quite large:
 
 http://localhost:8080/actuator/health::
 Displays Application and Datasource health information.  This can be customized based on application functionality, which we'll do later.
