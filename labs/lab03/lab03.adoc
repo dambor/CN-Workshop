@@ -566,6 +566,54 @@ management:
       mode: full
 ----
 
+. In order to leverage this artifact in subsequent projects (which will be required in a bit) add the following execution and classifier to the `spring-boot-maven-plugin`:
++
+.cloud-native-spring/pom.xml
+[source,xml]
+----
+<executions>
+  <execution>
+    <goals>
+      <goal>build-info</goal>
+    </goals>
+  </execution>
+</executions>
+<configuration>
+  <classifier>exec</classifier>
+</configuration>
+----
++
+The full plugin config should look like the following:
++
+.cloud-native-spring/pom.xml
+[source,xml]
+----
+<project>
+  [...]
+  <build>
+    <plugins>
+      [...]
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <classifier>exec</classifier>
+        </configuration>
+      </plugin>
+      [...]
+    </plugins>
+  </build>
+  [...]
+</project
+----
+
 . Rebuild the application
 +
 [source,bash]
