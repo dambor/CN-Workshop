@@ -29,13 +29,17 @@ Spring Boot includes a number of additional features to help you monitor and man
 </dependency>
 ----
 
-. By default Spring Boot doesn't publish via a web endpoint these management endpoints (which is a good thing!)  Though you wouldn't want to disable this in production, we'll do so in this sample app to make demonstration a bit easier and simpler.
+. By default Spring Boot will use Spring Security to protect these management endpoints (which is a good thing!) We’ll set a simple password to make demonstration a bit easier and simpler.  Additionally, we need to publish these endpoints via REST.
 +
 Add the following to your Spring Boot configuration:
 +
 .cloud-native-spring/src/main/resources/application.yml
 [source,yaml]
 ----
+spring:
+  security:
+    user:
+      password: p1v0tal
 management:
   endpoints:
     web:
@@ -53,7 +57,7 @@ management:
 CN-Workshop/labs/my_work/cloud-native-spring $ ./mvnw spring-boot:run
 ----
 +
-Try out the following endpoints. The output is omitted here because it can be quite large:
+Try out the following endpoints. Remember that you set the password to _p1v0tal_ and the default username is _user_. The output is omitted here because it can be quite large:
 
 http://localhost:8080/actuator/health::
 Displays Application and Datasource health information.  This can be customized based on application functionality, which we'll do later.
