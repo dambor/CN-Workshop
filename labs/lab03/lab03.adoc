@@ -28,8 +28,8 @@ Spring Boot includes a number of additional features to help you monitor and man
   <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
 <dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-starter-security</artifactId>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-security</artifactId>
 </dependency>
 ----
 
