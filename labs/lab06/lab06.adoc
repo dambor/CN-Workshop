@@ -136,10 +136,6 @@ spring:
 feign:
   hystrix:
     enabled: true
-
-security:
-  basic:
-    enabled: false
 ----
 
 == Create the Circuit Breaker Dashboard
@@ -148,6 +144,10 @@ security:
 +
 [source,bash]
 ----
+# Use trial if deploying to PWS
+CN-Workshop/labs/my_work/cloud-native-spring-ui $ cf create-service p-circuit-breaker-dashboard trial circuit-breaker-dashboard
+
+# Other PCF Deploys
 CN-Workshop/labs/my_work/cloud-native-spring-ui $ cf create-service p-circuit-breaker-dashboard standard circuit-breaker-dashboard
 ----
 
