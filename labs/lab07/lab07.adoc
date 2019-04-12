@@ -321,6 +321,7 @@ public String greeting(@PathVariable("name") String name) {
 ----
 
 . Now our tests should pass.  Execute the Maven build command again.  Now we have an assurance that as we change code, as long as our automated contract tests do not fail, we know we won't impact a consuming client with our changes.
++
 [source,bash]
 ----
 ./mvnw clean package
