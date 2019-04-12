@@ -34,6 +34,7 @@ IMPORTANT: Each new lab exercise builds upon the preceding lab, so please do not
 ** Lab 6: link:labs/lab06/lab06.adoc[Microservice Fault Tolerance with Circuit Breakers]
 * Session 9: https://docs.google.com/presentation/d/1LMRAUL2x6ZbE0QjMOCJQdu7aVorobUbJdJBYYjSfn2Q/edit#slide=id.g3090ca3a8c_0_1290[_Spring Cloud Contract_]
 ** Lab 7: link:labs/lab07/lab07.adoc[Spring Cloud Contract - Consumer Drive Contracts]
+
 == Lab Setup
 
 To build the applications in this workshop, you'll need a couple of things:
