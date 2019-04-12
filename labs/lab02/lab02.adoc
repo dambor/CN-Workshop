@@ -108,7 +108,7 @@ public interface CityRepository extends PagingAndSortingRepository<City, Long> {
 }
 ----
 
-. Add JPA and REST Repository support to the `io.pivotal.cloudnativespring.CloudNativeSpringApplication` Spring Boot Application class.
+. Add JPA support to the `io.pivotal.cloudnativespring.CloudNativeSpringApplication` Spring Boot Application class.
 +
 .cloud-native-spring/src/main/java/io/pivotal/cloudnativespring/CloudNativeSpringApplication.java
 [source,java,numbered]
@@ -128,7 +128,6 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguratio
 @SpringBootApplication
 @RestController
 @EnableJpaRepositories // <---- And this
-@Import(RepositoryRestMvcConfiguration.class) // <---- And this
 public class CloudNativeSpringApplication {
 
 	public static void main(String[] args) {
@@ -194,7 +193,7 @@ Next we'll import some data.
 +
 [source,bash]
 ----
-CN-Workshop/labs/my_work/cloud-native-spring $ cp ../../lab02/import.sql src/main/resources/.
+CN-Workshop/labs/my_work/cloud-native-spring $ cp ../../lab02/import.sql src/main/resources/
 ----
 
 . Restart the application.
