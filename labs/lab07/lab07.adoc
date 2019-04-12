@@ -285,6 +285,7 @@ public class GreetingBase {
 ----
 
 . We can now execute out application build and test will be automatically generated and execute against our stubs.  Execute:
++
 [source,bash]
 ----
 ./mvnw clean package
