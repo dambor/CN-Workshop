@@ -1,0 +1,8 @@
+request:
+  method: GET
+  url: /greeting/Pivotal
+response:
+  status: 200
+  body: "Hello Pivotal"
+  headers:
+    Content-Type: text/plain;charset=utf-8
