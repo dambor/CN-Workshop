@@ -216,53 +216,12 @@ CN-Workshop/labs/my_work/cloud-native-spring-ui $ mv src/main/resources/applicat
 .cloud-native-spring-ui/pom.xml
 [source,xml,subs="verbatim,attributes"]
 ----
-<project>
-  [...]
-  <properties>
-    <java.version>1.8</java.version>
-    <spring-cloud-services.version>{spring-cloud-services-dependencies-version}</spring-cloud-services.version>
-    <spring-cloud.version>{spring-cloud-dependencies-version}</spring-cloud.version>
-    <vaadin.version>13.0.3</vaadin.version>
-  </properties>
-  [...]
-  <dependencies>
-    [...]
-    <dependency>
-      <groupId>io.pivotal.spring.cloud</groupId>
-      <artifactId>spring-cloud-services-starter-service-registry</artifactId>
-    </dependency>
-    [...]
-  </dependencies>
-  [...]
-  <dependencyManagement>
-    <dependencies>
-      [...]
-      <dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-bom</artifactId>
-				<version>${vaadin.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.pivotal.spring.cloud</groupId>
-				<artifactId>spring-cloud-services-dependencies</artifactId>
-				<version>${spring-cloud-services.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-      [...]
-    </dependencies>
-  </dependencyManagement>
-  [...]
-</project>
+<properties>
+  <java.version>1.8</java.version>
+  <spring-cloud-services.version>{spring-cloud-services-dependencies-version}</spring-cloud-services.version>
+  <spring-cloud.version>{spring-cloud-dependencies-version}</spring-cloud.version>
+  <vaadin.version>13.0.3</vaadin.version>
+</properties>
 ----
 
 . To get a bit of code reuse, we'll be using the `City` domain object from our main `cloud-native-spring` Spring Boot application. We don't want to pull in any of its transitive dependencies so we explicitly exclude them, however, we do still need `spring-boot-starter-data-rest` to consume the `/cities` service so we add that one in.
