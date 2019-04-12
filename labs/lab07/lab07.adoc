@@ -243,6 +243,7 @@ Matched-Stub-Id: [7f989959-9204-4102-87e2-70a8bcbf3546]
 . Switch you IDE back to the backend, Cloud Native Spring.  Right now our test would fail since we don't have the appropriate implementation our client depends on.
 
 . The first thing we need to do is add the Spring Cloud Contract testing dependencies into our Maven project dependencies.  Previously we only added the Maven plugin.  Now add these dependencies:
++
 .cloud-native-spring/pom.xml
 [source,xml]
 ----
