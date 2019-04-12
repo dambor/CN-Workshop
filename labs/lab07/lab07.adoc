@@ -1,0 +1,337 @@
+= Enabling Consumer Driven Contract testing with Spring Cloud Contracts
+
+== Overview
+
+[.lead]
+In this lab we'll utilize Spring Cloud Contract to define a testable API contract between our two applications.  First the client will define an implementation and contract.  Second the server will make sure it successfully tests against its consumer's contracts.
+
+== Define Client Functionality and Test
+
+. We will first start working on the client in the Cloud Native Spring UI project.  Since we are practicing TDD, the first thing we need to do is write our test; which at this point won't be passing quite yet.  Add this annotation to the `CloudNativeSpringUiApplicationTests` class, which should be in the test package:
++
+.cloud-native-spring-ui/src/test/java/io/pivotal/cloudnativespringui/CloudNativeSpringUiApplicationTests.java
+[source,java,numbered]
+----
+@Autowired
+private CloudNativeSpringUiApplication.GreetingService greeter;
+
+@Test
+public void testGreeting() {
+	// given:
+	String name = "Pivotal";
+
+	// when:
+	String result = greeter.greeting(name);
+
+	// then:
+	Assert.isTrue(result.endsWith(name), "Greeting was not correct");
+}
+----
+
+. Now that we have a test created, lets actually move on to creating an implementation of our Greeter Service.  Create the following inner class within the `CloudNativeSpringUiApplication` class:
++
+.cloud-native-spring-ui/src/main/java/io/pivotal/cloudnativespringui/CloudNativeSpringUiApplication.java
+[source,java,numbered]
+----
+@Component
+public class GreetingService {
+
+	public String greeting(String name) {
+		ResponseEntity<String> response = new RestTemplate().getForEntity(
+				"http://localhost:8888/greeting/" + name, String.class);
+		return response.getBody();
+	}
+}
+----
++
+. Note that this has some hardcoded URLs and ports.  In the real world we wouldn't do this, but its fine for our simple contract demonstration.  In actuality, we'll never even connect to a running REST backend.  You'll see why shortly.
+
+. Lets try running our test now using the command `./mvnw clean package`.
++
+[source,bash]
+----
+./mvnw clean package
+
+...
+
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Errors:
+[ERROR]   CloudNativeSpringUiApplicationTests.testGreeting:25 » ResourceAccess I/O error...
+[INFO]
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 20.152 s
+[INFO] Finished at: 2019-04-12T09:54:44-04:00
+[INFO] Final Memory: 79M/548M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.22.1:test (default-test) on project cloud-native-spring-ui: There are test failures.
+----
+
+. Why did this fail?  We do not have a backend server to test against nor do we have any mock objects that simulate the backend responses.  Lets fix that.
+
+== Define Client Contract
+
+. The client contract is defined against the server.  Typically a consuming client would clone the server/backend git repo inorder to add their client.  Since we already have the backend on our workstation, wimple switch your IDE to the original Cloud Native Spring project.
+
+. Spring Cloud Contract will automatically look in the `test/resources/contracts` folder for consumer contracts to both test against and generate stubs.  Create that folder structure and empty contract with the following commands:
++
+[source,bash]
+----
+ mkdir -p src/test/resources/contracts/greeting
+
+ touch src/test/resources/contracts/greeting/test.yml
+----
+
+. Describe our simple client contract by pasting the contents below into `test.yml`:
++
+.cloud-native-spring/src/test/resources/contracts/greeting/test.yml
+[source,yml]
+----
+request:
+  method: GET
+  url: /greeting/Pivotal
+response:
+  status: 200
+  body: "Hello Pivotal"
+  headers:
+    Content-Type: text/plain;charset=utf-8
+----
++
+. This contract is very simple.  When an `HTTP GET `request is sent to the url `/greeting/Pivotal` the client expects a plain text response with the greeting.
+
+. Finally, we need to add the Spring Cloud Contract maven plugin to our Maven POM file.  Add the following to your plugins declaration:
++
+.cloud-native-spring/pom.xml
+[source,xml]
+----
+<plugin>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-contract-maven-plugin</artifactId>
+	<extensions>true</extensions>
+	<configuration>
+		<packageWithBaseClasses>io.pivotal.cloudnativespring</packageWithBaseClasses>
+		<convertToYaml>true</convertToYaml>
+	</configuration>
+</plugin>
+----
+
+. Now we can generate the contract stubs that can be used for both client testing and server validation.  We'll use the typical `./mvnw clean install command`, but since at the moment we're acting as a client developer defining the contract, we need to skip the server tests, since they would fail. Execute:
++
+[source,bash]
+----
+ ./mvnw clean install -DskipTests
+----
+
+. You'll note one very important step in the output.  The stubs are generated and then added to our local maven repo.  These can now be used by the client for testing:
++
+[source,bash]
+----
+...
+[INFO] --- spring-cloud-contract-maven-plugin:2.1.1.RELEASE:convert (default-convert) @ cloud-native-spring ---
+[INFO] Will use contracts provided in the folder [/Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/src/test/resources/contracts]
+[INFO] Copying Spring Cloud Contract Verifier contracts to [/Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/stubs/META-INF/io.pivotal/cloud-native-spring/0.0.1-SNAPSHOT/contracts]. Only files matching [.*] pattern will end up in the final JAR with stubs.
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying Spring Cloud Contract Verifier contracts to [/Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/stubs/META-INF/io.pivotal/cloud-native-spring/0.0.1-SNAPSHOT/original]. Only files matching [.*] pattern will end up in the final JAR with stubs.
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Replaced DSL files with their YAML representation at [/Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/stubs/META-INF/io.pivotal/cloud-native-spring/0.0.1-SNAPSHOT/contracts]
+[INFO] Converting from Spring Cloud Contract Verifier contracts to WireMock stubs mappings
+[INFO]      Spring Cloud Contract Verifier contracts directory: /Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/stubs/META-INF/io.pivotal/cloud-native-spring/0.0.1-SNAPSHOT/contracts
+[INFO] Stub Server stubs mappings directory: /Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/stubs/META-INF/io.pivotal/cloud-native-spring/0.0.1-SNAPSHOT/mappings
+[INFO] Creating new stub [/Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/stubs/META-INF/io.pivotal/cloud-native-spring/0.0.1-SNAPSHOT/mappings/greeting/test.json]
+...
+[INFO] Installing /Users/azwickey/demo-projects/CN-Workshop/labs/my_work/cloud-native-spring/target/cloud-native-spring-0.0.1-SNAPSHOT-stubs.jar to /Users/azwickey/.m2/repository/io/pivotal/cloud-native-spring/0.0.1-SNAPSHOT/cloud-native-spring-0.0.1-SNAPSHOT-stubs.jar
+...
+----
+
+== Consume and Test Against Contract Stubs
+
+. Now that we have our testing stubs generated, switch your IDE back to the Cloud Native Spring UI project.  The first thing we need to do is add the Spring Cloud Contract testing dependencies into our Maven project dependencies:
++
+.cloud-native-spring-ui/pom.xml
+[source,xml]
+----
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-test</artifactId>
+	<scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
+	<scope>test</scope>
+</dependency>
+----
+
+. We have to make two minor changes to the annotations in our application testing class to activate the contract stubs.  First, we need to actually spin up a web environment for testing (e.g. a mock server that will respond) and second, we need to enable the Stubrunner to recognize our stubs.  Modify the annotations on the `CloudNativeSpringUiApplicationTests` class to be as follows:
++
+.cloud-native-spring-ui/src/test/java/io/pivotal/cloudnativespringui/CloudNativeSpringUiApplicationTests.java
+[source,java,numbered]
+----
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureStubRunner(
+		ids = { "io.pivotal:cloud-native-spring:+:stubs:8888" },
+		stubsMode = StubRunnerProperties.StubsMode.LOCAL)
+public class CloudNativeSpringUiApplicationTests {
+ ...
+ }
+----
+
+. Now, try running your tests again.  This time they should be invoked against a stubbed server and pass!
+[source,bash]
+----
+./mvnw clean package
+...
+2019-04-12 10:29:24.143  INFO 79049 --- [tp1331139970-32] /                                        : RequestHandlerClass from context returned com.github.tomakehurst.wiremock.http.StubRequestHandler. Normalized mapped under returned 'null'
+2019-04-12 10:29:24.260  INFO 79049 --- [tp1331139970-32] WireMock                                 : Request received:
+127.0.0.1 - GET /greeting/Pivotal
+
+User-Agent: [Java/1.8.0_191]
+Connection: [keep-alive]
+Host: [localhost:8888]
+Accept: [text/plain, application/json, application/*+json, */*]
+
+
+
+Matched response definition:
+{
+  "status" : 200,
+  "body" : "Hello Pivotal",
+  "headers" : {
+    "Content-Type" : "text/plain;charset=utf-8"
+  },
+  "transformers" : [ "response-template" ]
+}
+
+Response:
+HTTP/1.1 200
+Content-Type: [text/plain;charset=utf-8]
+Matched-Stub-Id: [7f989959-9204-4102-87e2-70a8bcbf3546]
+...
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO]
+[INFO] --- maven-jar-plugin:3.1.1:jar (default-jar) @ cloud-native-spring-ui ---
+[INFO] Building jar: /Users/azwickey/Downloads/cloud-native-spring-ui/target/cloud-native-spring-ui-0.0.1-SNAPSHOT.jar
+[INFO]
+[INFO] --- spring-boot-maven-plugin:2.1.4.RELEASE:repackage (repackage) @ cloud-native-spring-ui ---
+[INFO] Replacing main artifact with repackaged archive
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  22.481 s
+[INFO] Finished at: 2019-04-12T10:29:28-04:00
+[INFO] ------------------------------------------------------------------------
+----
++
+. You may see a few exceptions, but those are only warnings that you did not have a Eureka Service Registry available.  That is not needed for our testing here and can be ignored.
+
+. Congratulations, your client is now finished.  Typically at this point the client developer would submit a PR to the server/backend repo with the contract they created.  Since we alos own the backend we can skip that step.  Finally, lets make sure our tests are also passing on the backend service.
+
+== Leverage the Contract Verifier on server side
+
+. Switch you IDE back to the backend, Cloud Native Spring.  Right now our test would fail since we don't have the appropriate implementation our client depends on.
+
+. The first thing we need to do is add the Spring Cloud Contract testing dependencies into our Maven project dependencies.  Previously we only added the Maven plugin.  Now add these dependencies:
+.cloud-native-spring/pom.xml
+[source,xml]
+----
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-test</artifactId>
+	<scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-contract-verifier</artifactId>
+	<scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-contract-wiremock</artifactId>
+	<scope>test</scope>
+</dependency>
+----
+
+. Within the testing package we need to create a _Base_ class that all Greeting tests that are auto-generated will extend.  All this class does is create some basic scaffolding for our tests.  Create the following class:
++
+.cloud-native-spring/src/test/java/io/pivotal/cloudnativespring/GreetingBase.java
++
+[source,java,numbered]
+----
+package io.pivotal.cloudnativespring;
+
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import org.junit.Before;
+
+public class GreetingBase {
+
+    @Before
+    public void setup() {
+        RestAssuredMockMvc.standaloneSetup(new CloudNativeSpringApplication());
+    }
+}
+----
+
+. We can now execute out application build and test will be automatically generated and execute against our stubs.  Execute:
+[source,bash]
+----
+./mvnw clean package
+
+...
+
+[ERROR] Failures:
+[ERROR]   GreetingTest.validate_test:32
+Expecting:
+ <404>
+to be equal to:
+ <200>
+but was not.
+[INFO]
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+----
+
+. Our tests failed, but that is OK; we haven't created the proper implementation yet.  The important thing is that a set of autogenerated tests were created and executed that match the expected client contract.
+
+. To finish the exercise, create an method in the `CloudNativeSpringApplication` that matches the client contract.  Add the following method:
++
+.cloud-native-spring/src/main/java/io/pivotal/cloudnativespring/CloudNativeSpringApplication.java
+[source,java,numbered]
+----
+@RequestMapping(value = "/greeting/{name}", produces = "text/plain;charset=utf-8")
+public String greeting(@PathVariable("name") String name) {
+	return "Hello " + name;
+}
+----
+
+. Now our tests should pass.  Execute the Maven build command again.  Now we have an assurance that as we change code, as long as our automated contract tests do not fail, we know we won't impact a consuming client with our changes.
+[source,bash]
+----
+./mvnw clean package
+
+...
+
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.293 s - in io.pivotal.cloudnativespring.GreetingTest
+12:21:28.962 [Thread-0] DEBUG org.springframework.context.support.GenericApplicationContext - Closing org.springframework.context.support.GenericApplicationContext@e50a6f6, started on Fri Apr 12 12:21:27 EDT 2019
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+----
