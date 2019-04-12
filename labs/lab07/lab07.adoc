@@ -232,7 +232,7 @@ Matched-Stub-Id: [7f989959-9204-4102-87e2-70a8bcbf3546]
 [INFO] Finished at: 2019-04-12T10:29:28-04:00
 [INFO] ------------------------------------------------------------------------
 ----
-+
+
 . You may see a few exceptions, but those are only warnings that you did not have a Eureka Service Registry available.  That is not needed for our testing here and can be ignored.
 
 . Congratulations, your client is now finished.  Typically at this point the client developer would submit a PR to the server/backend repo with the contract they created.  Since we alos own the backend we can skip that step.  Finally, lets make sure our tests are also passing on the backend service.
