@@ -544,12 +544,6 @@ Spring Boot provides a http://localhost:8080/actuator/metrics[/metrics] endpoint
 . Stop the _cloud-native-spring_ application.
 
 == Deploy _cloud-native-spring_ to Pivotal Cloud Foundry
-. Build the application:
-+
-[source,bash]
-----
-CN-Workshop/labs/my_work/cloud-native-spring $ ./mvnw package
-----
 
 . When running a Spring Boot application on Pivotal Cloud Foundry with the actuator endpoints enabled, you can visualize actuator management information on the Apps Manager dashboard.  To enable this there are a few properties we need to add.
 +
@@ -610,6 +604,22 @@ The full plugin config should look like the following:
   </build>
   [...]
 </project
+----
+
+. Since we added this plugin we now needed to update the `manifest.yml` to point to the new jar name.
++
+.cloud-native-spring/manifest.yml
+[source,yaml]
+----
+---
+applications:
+- name: cloud-native-spring
+  random-route: true
+  memory: 768M
+  path: target/cloud-native-spring-0.0.1-SNAPSHOT-exec.jar
+  timeout: 180 # to give time for the data to import
+  env:
+    JAVA_OPTS: -Djava.security.egd=file:///dev/urandom
 ----
 
 . Rebuild the application
