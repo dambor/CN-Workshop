@@ -120,7 +120,7 @@ response:
 </plugin>
 ----
 
-. Now we can generate the contract stubs that can be used for both client testing and server validation.  We'll use the typical `./mvnw clean install command`, but since at the moment we're acting as a client developer defining the contract, we need to skip the server tests, since they would fail. Execute:
+. Now we can generate the contract stubs that can be used for both client testing and server validation.  Typically we use `./mvnw clean install` command, but since at the moment we're acting as a client developer defining the contract, we need to skip the server tests since they would fail. Execute:
 +
 [source,bash]
 ----
@@ -157,11 +157,6 @@ response:
 .cloud-native-spring-ui/pom.xml
 [source,xml]
 ----
-<dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-starter-test</artifactId>
-	<scope>test</scope>
-</dependency>
 <dependency>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
@@ -242,24 +237,14 @@ Matched-Stub-Id: [7f989959-9204-4102-87e2-70a8bcbf3546]
 
 . Switch you IDE back to the backend, Cloud Native Spring.  Right now our test would fail since we don't have the appropriate implementation our client depends on.
 
-. The first thing we need to do is add the Spring Cloud Contract testing dependencies into our Maven project dependencies.  Previously we only added the Maven plugin.  Now add these dependencies:
+. The first thing we need to do is add the Spring Cloud Contract testing dependencies into our Maven project dependencies.  Previously we only added the Maven plugin.  Now add the contract verifier dependency:
 +
 .cloud-native-spring/pom.xml
 [source,xml]
 ----
 <dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-starter-test</artifactId>
-	<scope>test</scope>
-</dependency>
-<dependency>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-starter-contract-verifier</artifactId>
-	<scope>test</scope>
-</dependency>
-<dependency>
-	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-contract-wiremock</artifactId>
 	<scope>test</scope>
 </dependency>
 ----
