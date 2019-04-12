@@ -7,7 +7,7 @@ In this lab we'll utilize Spring Cloud Contract to define a testable API contrac
 
 == Define Client Functionality and Test
 
-. We will first start working on the client in the Cloud Native Spring UI project.  Since we are practicing TDD, the first thing we need to do is write our test; which at this point won't be passing quite yet.  Add this annotation to the `CloudNativeSpringUiApplicationTests` class, which should be in the test package:
+. We will first start working on the client in the Cloud Native Spring UI project.  Since we are practicing TDD, the first thing we need to do is write our test; which at this point won't be passing quite yet.  Add this test and field to the `CloudNativeSpringUiApplicationTests` class, which should be in the test package:
 +
 .cloud-native-spring-ui/src/test/java/io/pivotal/cloudnativespringui/CloudNativeSpringUiApplicationTests.java
 [source,java,numbered]
@@ -76,7 +76,7 @@ public class GreetingService {
 
 == Define Client Contract
 
-. The client contract is defined against the server.  Typically a consuming client would clone the server/backend git repo inorder to add their client.  Since we already have the backend on our workstation, wimple switch your IDE to the original Cloud Native Spring project.
+. The client contract is defined against the server.  Typically a consuming client would clone the server/backend git repo in order to add their client contract.  Since we already have the backend on our workstation, simply switch your IDE to the original Cloud Native Spring project.
 
 . Spring Cloud Contract will automatically look in the `test/resources/contracts` folder for consumer contracts to both test against and generate stubs.  Create that folder structure and empty contract with the following commands:
 +
@@ -87,7 +87,7 @@ public class GreetingService {
  touch src/test/resources/contracts/greeting/test.yml
 ----
 
-. Describe our simple client contract by pasting the contents below into `test.yml`:
+. We describe our simple client contract by pasting the contents below into `test.yml`:
 +
 .cloud-native-spring/src/test/resources/contracts/greeting/test.yml
 [source,yml]
@@ -102,7 +102,7 @@ response:
     Content-Type: text/plain;charset=utf-8
 ----
 +
-. This contract is very simple.  When an `HTTP GET `request is sent to the url `/greeting/Pivotal` the client expects a plain text response with the greeting.
+. This contract is very simple.  When an `HTTP GET` request is sent to the url `/greeting/Pivotal` the client expects a plain text response with the greeting.
 
 . Finally, we need to add the Spring Cloud Contract maven plugin to our Maven POM file.  Add the following to your plugins declaration:
 +
