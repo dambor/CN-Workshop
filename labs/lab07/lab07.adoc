@@ -185,6 +185,7 @@ public class CloudNativeSpringUiApplicationTests {
 ----
 
 . Now, try running your tests again.  This time they should be invoked against a stubbed server and pass!
++
 [source,bash]
 ----
 ./mvnw clean package
