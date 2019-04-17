@@ -91,11 +91,13 @@ Dumps the application’s shell environment as well as all Java system propertie
 http://localhost:8080/actuator/mappings::
 Dumps all URI request mappings and the controller methods to which they are mapped.
 
-http://localhost:8080/actuator/dump::
+http://localhost:8080/actuator/threaddump::
 Performs a thread dump.
 
-http://localhost:8080/actuator/trace::
+http://localhost:8080/actuator/httptrace::
 Displays trace information (by default the last few HTTP requests).
+
+In case you want to see all the actuator endpoints, just go to the /actuator context.
 
 . Stop the _cloud-native-spring_ application.
 
@@ -119,7 +121,7 @@ Add the `git-commit-id-plugin` to Maven build plugins:
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
         <configuration>
-          <dotGitDirectory>../../../.git</dotGitDirectory>
+          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
         </configuration>
       </plugin>
       [...]
